@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>D3JS drawing bars from csv </title>
+    <style>
+        svg {
+            border: inset;
+            border-color: #65dbae;
+            border-width: 2px;
+        }
+
+        rect:hover {
+            fill: #ffff00;
+        }
+    </style>
+    <script src="../libs/d3.min.js"></script>
+
+</head>
+<body>
+<h3>D3JS drawing bars from csv </h3>
+
+<script type="application/javascript">
+    //YEAR,MONTH,DATE,NBR_AFF,NBR_SUIVI,NBR_DOC,NBR_ENV,NBR_DOC_ACC,NBRE_AFF_ACC
+    var data_url = '../data/NouveauxElementsGoeland.csv';
+    var w = 800;
+    var h = 350;
+    var dataset = [];
+    var yscale;
+    var padding = 2;
+    var svg = d3.select("body").append("svg")
+            .attr("height", h)
+            .attr("width", w);
+
+    d3.csv(data_url, function (data) {
+        //dataset = data.map(function(d){  return [ d['DATE'], +d['NBR_AFF'] ];  });
+        dataset = data.map(function (d) {
+            return +d['NBR_AFF'];
+        });
+        yscale = d3.scale.linear()
+                .domain([0, d3.max(dataset)])
+                .range([0, h - padding])
+        draw();
+    });
+
+
+    function draw() {
+        svg.selectAll("rect")
+                .data(dataset)
+                .enter()
+                .append("rect")
+                .attr({
+                    x: function (d, i) {
+                        return i * (w / dataset.length);
+                    },
+                    y: function (d) {
+                        return h - (yscale(d));
+                    },
+                    width: w / dataset.length - padding,
+                    height: function (d) {
+                        return yscale(d);
+                    },
+                    fill: function (d) {
+                        return d > d3.median(dataset) ? "red" : "blue"
+                    }
+                })
+                .append("title")
+                .text(function (d) {
+                    return d;
+                })
+    }
+
+
+</script>
+</body>
+</html>
