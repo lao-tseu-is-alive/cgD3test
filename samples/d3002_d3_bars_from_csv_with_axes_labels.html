@@ -39,7 +39,6 @@
             width = 800 - margin.left - margin.right,
             height = 500 - margin.top - margin.bottom;
     var dataset = [];
-    var yscale;
     var padding = 2;
     var svg = d3.select("body")
             .append("svg")
@@ -53,6 +52,11 @@
     var xAxis = d3.svg.axis()
             .scale(xscale)
             .orient("bottom");
+    var yscale = d3.scale.linear()
+            .range([height, 0]);
+    var yAxis = d3.svg.axis()
+            .scale(yscale)
+            .orient("left");
 
     d3.csv(data_url, function (data) {
         //dataset = data.map(function(d){  return [ d['DATE'], +d['NBR_AFF'] ];  });
@@ -60,11 +64,9 @@
         xscale.domain(data.map(function (d) {
             return d.DATE;
         }));
-        yscale = d3.scale.linear()
-                .domain([0, d3.max(data, function (d) {
+        yscale.domain([0, d3.max(data, function (d) {
                     return +d.NBR_AFF;
-                })])
-                .range([0, height - padding]);
+        })]);
         dataset = data;
         draw(data, 'DATE', 'NBR_AFF');
     });
@@ -77,6 +79,14 @@
             o.value = +d[field_y];
             return o;
         });
+        var median_value = d3.median(arr_values, function (d) {
+            return d.value
+        });
+        console.log(median_value);
+        var extent_value = d3.extent(arr_values, function (d) {
+            return d.value
+        });
+        console.log(extent_value);
         // label axe x horizontal
         svg.append("g")
                 .attr("class", "x axis")
@@ -88,11 +98,10 @@
                 .attr("dy", ".35em")
                 .attr("transform", "rotate(-90)")
                 .style("text-anchor", "end");
+        svg.append("g")
+                .attr("class", "y axis")
+                .call(yAxis);
 
-        var median_value = d3.median(arr_values, function (d) {
-            return d.value
-        });
-        console.log(median_value);
         svg.selectAll(".bar")
                 .data(arr_values)
                 .enter().append("rect")
@@ -101,12 +110,12 @@
                         return xscale(d.name);
                     },
                     y: function (d) {
-                        return height - (yscale(d.value));
+                        return yscale(d.value);
                     },
                     class: 'bar',
                     width: xscale.rangeBand(),
                     height: function (d) {
-                        return yscale(d.value);
+                        return height - yscale(d.value);
                     },
                     fill: function (d) {
                         return d.value > median_value ? "red" : "blue"
