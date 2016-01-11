@@ -35,7 +35,7 @@
 <script type="application/javascript">
     //YEAR,MONTH,DATE,NBR_AFF,NBR_SUIVI,NBR_DOC,NBR_ENV,NBR_DOC_ACC,NBRE_AFF_ACC
     var data_url = '../data/NouveauxElementsGoeland_small.csv';
-    var margin = {top: 20, right: 30, bottom: 30, left: 40},
+    var margin = {top: 20, right: 30, bottom: 60, left: 40},
             width = 800 - margin.left - margin.right,
             height = 500 - margin.top - margin.bottom;
     var dataset = [];
@@ -65,7 +65,7 @@
                     return +d.NBR_AFF;
                 })])
                 .range([0, height - padding]);
-        dataset = data
+        dataset = data;
         draw(data, 'DATE', 'NBR_AFF');
     });
 
@@ -77,21 +77,28 @@
             o.value = +d[field_y];
             return o;
         });
-
+        // label axe x horizontal
         svg.append("g")
                 .attr("class", "x axis")
                 .attr("transform", "translate(0," + height + ")")
-                .call(xAxis);
+                .call(xAxis)
+                .selectAll("text")
+                .attr("y", 0)
+                .attr("x", -10)
+                .attr("dy", ".35em")
+                .attr("transform", "rotate(-90)")
+                .style("text-anchor", "end");
 
         var median_value = d3.median(arr_values, function (d) {
             return d.value
         });
+        console.log(median_value);
         svg.selectAll(".bar")
                 .data(arr_values)
                 .enter().append("rect")
                 .attr({
-                    x: function (d, i) {
-                        return i * (width / dataset.length);
+                    x: function (d) {
+                        return xscale(d.name);
                     },
                     y: function (d) {
                         return height - (yscale(d.value));
@@ -102,7 +109,7 @@
                         return yscale(d.value);
                     },
                     fill: function (d) {
-                        return d > median_value ? "red" : "blue"
+                        return d.value > median_value ? "red" : "blue"
                     }
                 })
                 .append("title")
