@@ -15,48 +15,96 @@ import sass from 'gulp-sass';
 import sourcemaps from 'gulp-sourcemaps';
 
 /* NOT used for now
-import uglify from 'gulp-uglify';
-*/
+ import uglify from 'gulp-uglify';
+ */
+
 const dirs = {
-    dest: 'dist',
+    dest_dev: 'src',
+    dest_prod: 'dist',
     src: 'src',
 };
+
+const jsFilename = 'completeapp.js'
 const jsPaths = {
-    dest: `${dirs.dest}/js/`,
+    dest_dev: `${dirs.dest_dev}/js/`,
+    dest_prod: `${dirs.dest_prod}/js/`,
     src: `${dirs.src}/js/**.js`,
 };
 const sassPaths = {
-    dest: `${dirs.dest}/css/`,
+    dest_dev: `${dirs.dest_dev}/css/`,
+    dest_prod: `${dirs.dest_prod}/css/`,
     src: `${dirs.src}/sass/**/*.scss`,
 };
 
 gulp.task(
-    'clean', () => del(
+    'clean:dev', () => del(
         [
-            `${dirs.dest}/*`,
+            `${sassPaths.dest_dev}/*`,
+            `${jsPaths.dest_dev}/${jsFilename}`,
+            `${jsPaths.dest_dev}/${jsFilename}.map`,
         ]));
 
 
 gulp.task(
-    'sass', () => gulp.src(sassPaths.src)
-                      .pipe(plumber())
-                      .pipe(sourcemaps.init())
-                      .pipe(
-                          sass.sync({outputStyle: 'compressed'})
-                              .on('error', sass.logError))
-                      .pipe(
-                          autoprefixer(
-                              {
-                                  browsers: ['> 1%',
-                                      'last 2 versions',
-                                      'Firefox ESR'],
-                              }))
-                      .pipe(sourcemaps.write('.'))
-                      .pipe(gulp.dest(sassPaths.dest)));
+    'clean:prod', () => del(
+        [
+            `${dirs.dest_prod}/*`,
+        ]));
 
 gulp.task(
-    'scripts', () => {
-        console.log(`# saving min scripts : ${jsPaths.dest} directory`);
+    'sass:dev', () => gulp.src(sassPaths.src)
+                          .pipe(plumber())
+                          .pipe(sourcemaps.init())
+                          .pipe(
+                              sass.sync({outputStyle: 'nested'})
+                                  .on('error', sass.logError))
+                          .pipe(
+                              autoprefixer(
+                                  {
+                                      browsers: ['> 1%',
+                                          'last 2 versions',
+                                          'Firefox ESR'],
+                                  }))
+                          .pipe(sourcemaps.write('.'))
+                          .pipe(gulp.dest(sassPaths.dest_dev)));
+
+gulp.task(
+    'sass:prod', () => gulp.src(sassPaths.src)
+                           .pipe(plumber())
+                           .pipe(sourcemaps.init())
+                           .pipe(
+                               sass.sync({outputStyle: 'compressed'})
+                                   .on('error', sass.logError))
+                           .pipe(
+                               autoprefixer(
+                                   {
+                                       browsers: ['> 1%',
+                                           'last 2 versions',
+                                           'Firefox ESR'],
+                                   }))
+                           .pipe(sourcemaps.write('.'))
+                           .pipe(gulp.dest(sassPaths.dest_prod)));
+
+gulp.task(
+    'scripts:dev', () => gulp.src(jsPaths.src)
+                   .pipe(plumber())
+                   .pipe(sourcemaps.init())
+                   .pipe(
+                       babel(
+                           {
+                               comments: true,
+                               compact: false,
+                               minified: false,
+                               presets: ['es2015'],
+                           }))
+                   .pipe(concat(`${jsFilename}`))
+                   .pipe(sourcemaps.write('.'))
+                   .pipe(gulp.dest(jsPaths.dest_dev)));
+
+
+gulp.task(
+    'scripts:prod', () => {
+        console.log(`# saving min scripts : ${jsPaths.dest_prod} directory`);
 
         return gulp.src(jsPaths.src)
                    .pipe(plumber())
@@ -69,14 +117,15 @@ gulp.task(
                                minified: true,
                                presets: ['es2015'],
                            }))
-                   .pipe(concat('all.js'))
+                   .pipe(concat(`${jsFilename}`))
                    .pipe(sourcemaps.write('.'))
-                   .pipe(gulp.dest(jsPaths.dest));
+                   .pipe(gulp.dest(jsPaths.dest_prod));
     });
 
 gulp.task(
     'watch', () => {
-        gulp.watch(`${jsPaths.src}/**.js`, ['scripts']);
+        gulp.watch(jsPaths.src, ['scripts:dev']);
+        gulp.watch(sassPaths.src, ['sass:dev']);
     });
 
 gulp.task(
