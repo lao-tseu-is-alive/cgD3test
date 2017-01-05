@@ -1,0 +1,54 @@
+{
+  "name": "cgd3test",
+  "version": "1.0.0",
+  "description": "testing d3js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lao-tseu-is-alive/cgD3test.git"
+  },
+  "keywords": [
+    "d3js"
+  ],
+  "author": "cgil",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lao-tseu-is-alive/cgD3test/issues"
+  },
+  "homepage": "https://github.com/lao-tseu-is-alive/cgD3test#readme",
+  "devDependencies": {
+    "babel-cli": "^6.18.0",
+    "babel-core": "^6.21.0",
+    "babel-preset-es2015": "^6.18.0",
+    "del": "^2.2.2",
+    "eslint": "^3.12.2",
+    "eslint-config-google": "^0.7.1",
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^3.1.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-concat": "^2.6.1",
+    "gulp-plumber": "^1.1.0",
+    "gulp-sass": "^3.0.0",
+    "gulp-sourcemaps": "^1.9.1",
+    "gulp-uglify": "^2.0.0"
+  },
+  "dependencies": {
+    "d3": "^4.4.0"
+  },
+  "eslintConfig": {
+    "env": {
+      "es6": true,
+      "node": true,
+      "browser": true
+    },
+    "rules": {
+      "quotes": [
+        2,
+        "single"
+      ]
+    }
+  }
+}
