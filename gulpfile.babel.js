@@ -12,7 +12,6 @@ import browserify from 'browserify';
 import buffer from 'vinyl-buffer';
 import del from 'del';
 import gulp from 'gulp';
-import plumber from 'gulp-plumber';
 import sass from 'gulp-sass';
 import source from 'vinyl-source-stream';
 import sourcemaps from 'gulp-sourcemaps';
@@ -53,6 +52,12 @@ const babelOptionsProd = {
     presets: ['es2015'],
 };
 
+
+function errorLog(error) {
+    console.error.bind(error);
+    this.emit('end');
+}
+
 gulp.task(
     'clean:dev', () => del(
         [
@@ -72,7 +77,6 @@ gulp.task(
 
 gulp.task(
     'sass:dev', () => gulp.src(sassPaths.src)
-                          .pipe(plumber())
                           .pipe(sourcemaps.init())
                           .pipe(
                               sass.sync({outputStyle: 'nested'})
@@ -89,7 +93,6 @@ gulp.task(
 
 gulp.task(
     'sass:prod', () => gulp.src(sassPaths.src)
-                           .pipe(plumber())
                            .pipe(sourcemaps.init())
                            .pipe(
                                sass.sync({outputStyle: 'compressed'})
@@ -109,7 +112,8 @@ gulp.task(
     'scripts:dev', ['clean:dev'], () => {
         const bundler = browserify(`${jsPaths.dest_dev}/${jsEntryPoint}`);
 
-        bundler.transform(babelify.configure(babelOptionsDev));
+        bundler.transform(babelify.configure(babelOptionsDev))
+               .on('error', (err) => console.error(err));
         bundler.bundle()
                .on('error', (err) => console.error(err))
                .pipe(source(`${jsBundleFilename}`))

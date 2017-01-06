@@ -16,7 +16,7 @@ function main() {
 want to buy ${card.amount} ${card.product} for
 a total of ${card.amount * card.unitprice} bucks?`;
 
-    Console.log('inside main');
+    Console.log('inside main function');
     Console.log(message);
 
 }
