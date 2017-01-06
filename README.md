@@ -4,6 +4,6 @@ to transpile various ES6 javascript files in ES5 and bundle it in a single file.
 
 first install all node required package use :
  ```shell
- npm init
+ npm install
   ```
 then use gulp to run a task
