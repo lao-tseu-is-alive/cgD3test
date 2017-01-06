@@ -2,11 +2,16 @@
   <dictionary name="cgil">
     <words>
       <w>autoprefixer</w>
+      <w>babelify</w>
+      <w>browserify</w>
+      <w>bundler</w>
       <w>dest</w>
       <w>eslint</w>
       <w>minified</w>
       <w>scss</w>
       <w>sourcemaps</w>
+      <w>transpile</w>
+      <w>transpiling</w>
       <w>uglify</w>
       <w>unitprice</w>
     </words>

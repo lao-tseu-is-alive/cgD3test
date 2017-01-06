@@ -5,7 +5,8 @@
 import Console from 'debug';
 
 function main() {
-    const customer = {name: 'Foo'};
+    // Just testing simple ES6 string interpolation
+    const customer = {name: 'You'};
     const card = {
         amount: 7,
         product: 'Bar',
@@ -17,7 +18,6 @@ a total of ${card.amount * card.unitprice} bucks?`;
 
     Console.log('inside main');
     Console.log(message);
-
 
 }
 

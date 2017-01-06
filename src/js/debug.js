@@ -3,7 +3,8 @@
  */
 'use strict';
 const windowConsole = window.console;
-const Console = {
+
+export const Console = {
 
     log: (message) => {
         windowConsole.log(message);

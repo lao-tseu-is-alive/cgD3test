@@ -7,16 +7,16 @@
 
 import autoprefixer from 'gulp-autoprefixer';
 import babel from 'gulp-babel';
-import concat from 'gulp-concat';
+import babelify from 'babelify';
+import browserify from 'browserify';
+import buffer from 'vinyl-buffer';
 import del from 'del';
 import gulp from 'gulp';
 import plumber from 'gulp-plumber';
 import sass from 'gulp-sass';
+import source from 'vinyl-source-stream';
 import sourcemaps from 'gulp-sourcemaps';
-
-/* NOT used for now
- import uglify from 'gulp-uglify';
- */
+import uglify from 'gulp-uglify';
 
 const dirs = {
     dest_dev: 'src',
@@ -24,7 +24,8 @@ const dirs = {
     src: 'src',
 };
 
-const jsFilename = 'completeapp.js'
+const jsEntryPoint = 'init.js';
+const jsBundleFilename = 'app.js';
 const jsPaths = {
     dest_dev: `${dirs.dest_dev}/js/`,
     dest_prod: `${dirs.dest_prod}/js/`,
@@ -36,19 +37,37 @@ const sassPaths = {
     src: `${dirs.src}/sass/**/*.scss`,
 };
 
+const babelOptionsDev = {
+    comments: true,
+    compact: false,
+    minified: false,
+    plugins: ['transform-es2015-modules-commonjs'],
+    presets: ['es2015'],
+};
+
+const babelOptionsProd = {
+    comments: false,
+    compact: true,
+    minified: true,
+    plugins: ['transform-es2015-modules-commonjs'],
+    presets: ['es2015'],
+};
+
 gulp.task(
     'clean:dev', () => del(
         [
             `${sassPaths.dest_dev}/*`,
-            `${jsPaths.dest_dev}/${jsFilename}`,
-            `${jsPaths.dest_dev}/${jsFilename}.map`,
+            `${jsPaths.dest_dev}/${jsBundleFilename}`,
+            `${jsPaths.dest_dev}/${jsBundleFilename}.map`,
+            `${jsPaths.dest_dev}/temp`,
         ]));
 
 
 gulp.task(
     'clean:prod', () => del(
         [
-            `${dirs.dest_prod}/*`,
+            `${dirs.dest_prod}/js/*`,
+            `${dirs.dest_prod}/css/*`,
         ]));
 
 gulp.task(
@@ -85,42 +104,46 @@ gulp.task(
                            .pipe(sourcemaps.write('.'))
                            .pipe(gulp.dest(sassPaths.dest_prod)));
 
+// Transpile all ES6 javascript file and put results in bundle
 gulp.task(
-    'scripts:dev', () => gulp.src(jsPaths.src)
-                   .pipe(plumber())
-                   .pipe(sourcemaps.init())
-                   .pipe(
-                       babel(
-                           {
-                               comments: true,
-                               compact: false,
-                               minified: false,
-                               presets: ['es2015'],
-                           }))
-                   .pipe(concat(`${jsFilename}`))
-                   .pipe(sourcemaps.write('.'))
-                   .pipe(gulp.dest(jsPaths.dest_dev)));
+    'scripts:dev', ['clean:dev'], () => {
+        const bundler = browserify(`${jsPaths.dest_dev}/${jsEntryPoint}`);
 
+        bundler.transform(babelify.configure(babelOptionsDev));
+        bundler.bundle()
+               .on('error', (err) => console.error(err))
+               .pipe(source(`${jsBundleFilename}`))
+               .pipe(buffer())
+               .pipe(sourcemaps.init({loadMaps: true}))
+               .pipe(sourcemaps.write('.'))
+               .pipe(gulp.dest(`${jsPaths.dest_dev}`));
+    }
+);
 
 gulp.task(
-    'scripts:prod', () => {
-        console.log(`# saving min scripts : ${jsPaths.dest_prod} directory`);
+    'scripts:prod', ['clean:prod'], () => {
+        const bundler = browserify(`${jsPaths.dest_dev}/${jsEntryPoint}`);
 
-        return gulp.src(jsPaths.src)
-                   .pipe(plumber())
-                   .pipe(sourcemaps.init())
-                   .pipe(
-                       babel(
-                           {
-                               comments: false,
-                               compact: true,
-                               minified: true,
-                               presets: ['es2015'],
-                           }))
-                   .pipe(concat(`${jsFilename}`))
-                   .pipe(sourcemaps.write('.'))
-                   .pipe(gulp.dest(jsPaths.dest_prod));
+        bundler.transform(babelify.configure(babelOptionsProd));
+        bundler.bundle()
+               .on('error', (err) => console.error(err))
+               .pipe(source(`${jsBundleFilename}`))
+               .pipe(buffer())
+               .pipe(sourcemaps.init({loadMaps: true}))
+               .pipe(uglify())
+               .pipe(sourcemaps.write('.'))
+               .pipe(gulp.dest(`${jsPaths.dest_prod}`));
     });
+
+
+// Allow to see all babel transpiling files in temp directory
+gulp.task(
+    'babel-compile-commonjs', ['clean:dev'], () =>
+        gulp.src(jsPaths.src)
+            .pipe(babel(babelOptionsDev))
+            .pipe(gulp.dest(`${jsPaths.dest_dev}/temp`))
+);
+
 
 gulp.task(
     'watch', () => {
@@ -129,6 +152,6 @@ gulp.task(
     });
 
 gulp.task(
-    'default', ['clean', 'scripts', 'sass'], () => {
-        console.log('# running default');
+    'default', ['clean:prod', 'scripts:prod', 'sass:prod'], () => {
+        console.log(`# preparing your bundle  in ${dirs.dest_prod} folder`);
     });
