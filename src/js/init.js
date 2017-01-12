@@ -2,23 +2,33 @@
  * Created by cgil on 1/5/17.
  */
 'use strict';
-import Console from 'debug';
+import Console from './cgdebug.js';
 
 function main() {
-    // Just testing simple ES6 string interpolation
-    const customer = {name: 'You'};
-    const card = {
-        amount: 7,
-        product: 'Bar',
-        unitprice: 42,
-    };
-    const message = `Hello ${customer.name},
-want to buy ${card.amount} ${card.product} for
-a total of ${card.amount * card.unitprice} bucks?`;
-
     Console.log('inside main function');
-    Console.log(message);
-
 }
 
-main();
+document.addEventListener(
+    'DOMContentLoaded', () => Console.logtimer(`#EVENT DOMContentLoaded : 
+        document.readyState=${document.readyState}`));
+window.addEventListener(
+    'load',  () => {
+        Console.logtimer('EVENT window load');
+        function loadScript(url, callback) {
+            // Adding the script tag to the head as suggested before
+            var head = document.getElementsByTagName('head')[0];
+            var script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src = url;
+
+            // Then bind the event to the callback function.
+            // There are several events for cross browser compatibility.
+            script.onreadystatechange = callback;
+            script.onload = callback;
+
+            // Fire the loading
+            head.appendChild(script);
+        }
+        main();
+    });
+

@@ -109,7 +109,7 @@ gulp.task(
 
 // Transpile all ES6 javascript file and put results in bundle
 gulp.task(
-    'scripts:dev', ['clean:dev'], () => {
+    'scripts:dev', ['clean:dev', 'sass:dev'], () => {
         const bundler = browserify(`${jsPaths.dest_dev}/${jsEntryPoint}`);
 
         bundler.transform(babelify.configure(babelOptionsDev))
@@ -125,7 +125,7 @@ gulp.task(
 );
 
 gulp.task(
-    'scripts:prod', ['clean:prod'], () => {
+    'scripts:prod', ['clean:prod', 'sass:prod'], () => {
         const bundler = browserify(`${jsPaths.dest_dev}/${jsEntryPoint}`);
 
         bundler.transform(babelify.configure(babelOptionsProd));
