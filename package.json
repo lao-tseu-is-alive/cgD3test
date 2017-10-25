@@ -40,7 +40,9 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
-    "d3": "^4.4.0"
+    "babel-polyfill": "^6.20.0",
+    "d3": "^4.4.0",
+    "systemjs": "^0.19.41"
   },
   "eslintConfig": {
     "env": {

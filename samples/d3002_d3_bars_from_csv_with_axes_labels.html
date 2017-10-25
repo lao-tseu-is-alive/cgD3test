@@ -25,108 +25,129 @@
             stroke: #000;
             shape-rendering: crispEdges;
         }
+
+        .bar {
+            color: #6f6f6f;
+        }
     </style>
-    <script src="../libs/d3.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
 
 </head>
 <body>
 <h3>D3JS drawing bars from csv with axes and labels </h3>
 
 <script type="application/javascript">
-    //YEAR,MONTH,DATE,NBR_AFF,NBR_SUIVI,NBR_DOC,NBR_ENV,NBR_DOC_ACC,NBRE_AFF_ACC
-    var data_url = '../data/NouveauxElementsGoeland_small.csv';
-    var margin = {top: 20, right: 30, bottom: 60, left: 40},
-            width = 800 - margin.left - margin.right,
-            height = 500 - margin.top - margin.bottom;
-    var dataset = [];
-    var padding = 2;
-    var svg = d3.select("body")
-            .append("svg")
-            .attr("height", height + margin.top + margin.bottom)
-            .attr("width", width + margin.left + margin.right)
-            .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  //YEAR,MONTH,DATE,NBR_AFF,NBR_SUIVI,NBR_DOC,NBR_ENV,NBR_DOC_ACC,NBRE_AFF_ACC
+  var data_url = '../data/NouveauxElementsGoeland_small.csv';
+  var margin = {top: 20, right: 30, bottom: 60, left: 40},
+    width = 800 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+  var dataset = [];
+  var padding = 2;
+  var svg = d3.select("body")
+              .append("svg")
+              .attr("height", height + margin.top + margin.bottom)
+              .attr("width", width + margin.left + margin.right)
+              .append("g")
+              .attr(
+                "transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    var xscale = d3.scale.ordinal()
-            .rangeRoundBands([0, width], 0.1);
-    var xAxis = d3.svg.axis()
-            .scale(xscale)
-            .orient("bottom");
-    var yscale = d3.scale.linear()
-            .range([height, 0]);
-    var yAxis = d3.svg.axis()
-            .scale(yscale)
-            .orient("left");
+  var xscale = d3.scaleBand()
+                 .range([0, width])
+                 .padding(0.1);
 
-    d3.csv(data_url, function (data) {
-        //dataset = data.map(function(d){  return [ d['DATE'], +d['NBR_AFF'] ];  });
-        //arr_nbr_aff = data.map(function(d){return +d.NBR_AFF})
-        xscale.domain(data.map(function (d) {
-            return d.DATE;
-        }));
-        yscale.domain([0, d3.max(data, function (d) {
-                    return +d.NBR_AFF;
-        })]);
-        dataset = data;
-        draw(data, 'DATE', 'NBR_AFF');
+  var yscale = d3.scaleLinear()
+                 .range([height, 0]);
+
+  d3.csv(data_url, function (data) {
+    //dataset = data.map(function(d){  return [ d['DATE'], +d['NBR_AFF'] ];  });
+    //arr_nbr_aff = data.map(function(d){return +d.NBR_AFF})
+    xscale.domain(data.map(function (d) {
+      return d.DATE;
+    }));
+    yscale.domain([0, d3.max(data, function (d) {
+      return +d.NBR_AFF;
+    })]);
+    dataset = data;
+    draw(data, 'DATE', 'NBR_AFF');
+  });
+
+
+  function draw(dataset, field_x, field_y) {
+    var arr_values = dataset.map(function (d) {
+      o = {};
+      o.name = d[field_x];
+      o.value = +d[field_y];
+      return o;
     });
+    var median_value = d3.median(arr_values, function (d) {
+      return d.value
+    });
+    console.log(median_value);
+    var extent_value = d3.extent(arr_values, function (d) {
+      return d.value
+    });
+    console.log(extent_value);
+    // label axe x horizontal
+    svg.append("g")
+       .attr("class", "x axis")
+       .attr("transform", "translate(0," + height + ")")
+       .call(d3.axisBottom(xscale))
+       .selectAll("text")
+       .attr("y", 0)
+       .attr("x", -10)
+       .attr("dy", ".35em")
+       .attr("transform", "rotate(-90)")
+       .style("text-anchor", "end");
+    svg.append("g")
+       .attr("class", "y axis")
+       .call(d3.axisLeft(yscale));
 
-
-    function draw(dataset, field_x, field_y) {
-        var arr_values = dataset.map(function (d) {
-            o = {};
-            o.name = d[field_x];
-            o.value = +d[field_y];
-            return o;
-        });
-        var median_value = d3.median(arr_values, function (d) {
-            return d.value
-        });
-        console.log(median_value);
-        var extent_value = d3.extent(arr_values, function (d) {
-            return d.value
-        });
-        console.log(extent_value);
-        // label axe x horizontal
-        svg.append("g")
-                .attr("class", "x axis")
-                .attr("transform", "translate(0," + height + ")")
-                .call(xAxis)
-                .selectAll("text")
-                .attr("y", 0)
-                .attr("x", -10)
-                .attr("dy", ".35em")
-                .attr("transform", "rotate(-90)")
-                .style("text-anchor", "end");
-        svg.append("g")
-                .attr("class", "y axis")
-                .call(yAxis);
-
-        svg.selectAll(".bar")
-                .data(arr_values)
-                .enter().append("rect")
-                .attr({
-                    x: function (d) {
-                        return xscale(d.name);
-                    },
-                    y: function (d) {
-                        return yscale(d.value);
-                    },
-                    class: 'bar',
-                    width: xscale.rangeBand(),
-                    height: function (d) {
-                        return height - yscale(d.value);
-                    },
-                    fill: function (d) {
-                        return d.value > median_value ? "red" : "blue"
-                    }
-                })
-                .append("title")
-                .text(function (d) {
-                    return d.name + ' : ' + d.value;
-                });
-
-    }
+    svg.selectAll(".bar")
+       .data(arr_values)
+       .enter()
+       .append("rect")
+       .attr("class", "bar")
+       .attr("x", function (d) {
+         return xscale(d.name);
+       })
+       .attr("y", function (d) {
+         return yscale(d.value);
+       })
+       .attr("width", xscale.bandwidth())
+       .attr("height", function (d) {
+         return height - yscale(d.value);
+       })
+       .attr("fill", function (d) {
+         return d.value > median_value ? "red" : "steelblue"
+       })
+       .append("title")
+       .text(function (d) {
+         return d.value;
+       })
+    /* code before v4
+         .attr({
+             x: function (d) {
+                 return xscale(d.name);
+             },
+             y: function (d) {
+                 return yscale(d.value);
+             },
+             class: 'bar',
+             width: xscale.rangeBand(),
+             height: function (d) {
+                 return height - yscale(d.value);
+             },
+             fill: function (d) {
+                 return d.value > median_value ? "red" : "blue"
+             }
+         })
+         .append("title")
+         .text(function (d) {
+             return d.name + ' : ' + d.value;
+         });
+*/
+  }
 
 
 </script>
