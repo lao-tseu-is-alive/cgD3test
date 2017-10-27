@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <style>
+        #chart-panel {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            padding: 10px 10px 20px 10px;
+        }
+    </style>
+
+    <!--<script src="echarts.js"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.7.2/echarts-en.js"></script>
+</head>
+<body>
+<div id="chart-panel" style="width: 600px;height:400px;"></div>
+<script type="text/javascript">
+
+  var myChart = echarts.init(document.getElementById('chart-panel'));
+
+  // specify chart configuration item and data
+  var option = {
+    title: {
+      text: 'Création de nouveaux éléements dans Goéland'
+    },
+    tooltip: {},
+    legend: {
+      data:['Sales']
+    },
+    xAxis: {
+      data: ["2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017"]
+
+    },
+    yAxis: {},
+    series: [{
+      name: 'affaires',
+      type: 'bar',
+      data: [685, 3180, 4280, 7467, 10568, 21202, 23065, 22333, 24683, 25321, 33059, 25003, 26074, 28668, 20993]
+    },{
+      name: 'documents',
+      type: 'bar',
+      data: [8980, 29846, 40214, 41088, 46893, 82326, 81447, 92218, 92783, 94930, 104948, 114618, 121450, 127134, 101582]
+    }
+    ]
+  };
+
+  // use configuration item and data specified to show chart
+  myChart.setOption(option);
+</script>
+</body>
+</html>

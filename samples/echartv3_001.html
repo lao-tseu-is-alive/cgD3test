@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+
+    <!--<script src="echarts.js"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.7.2/echarts-en.js"></script>
+</head>
+<body>
+<h3>Bars drawing with Echarts JS v3.7.2 </h3>
+<p>Basic example using <a href="https://ecomfe.github.io/echarts-doc/public/en/index.html">ECharts v.3.7.2</a> </p>
+<div id="main" style="width: 600px;height:400px;"></div>
+<script type="text/javascript">
+  // based on prepared DOM, initialize echarts instance
+  var myChart = echarts.init(document.getElementById('main'));
+
+  // specify chart configuration item and data
+  var option = {
+    title: {
+      text: 'ECharts entry example'
+    },
+    tooltip: {},
+    legend: {
+      data:['Sales']
+    },
+    xAxis: {
+      data: ["shirt","cardign","chiffon shirt","pants","heels","socks"]
+    },
+    yAxis: {},
+    series: [{
+      name: 'Sales',
+      type: 'bar',
+      data: [5, 20, 36, 10, 10, 20]
+    }]
+  };
+
+  // use configuration item and data specified to show chart
+  myChart.setOption(option);
+</script>
+</body>
+</html>
