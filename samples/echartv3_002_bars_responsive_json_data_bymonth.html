@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
+
+        #chart-panel {
+            position: relative;
+            left: 1%;
+            top: 1%;
+            width: 97%;
+            height: 97%;
+            padding: 5px 5px 5px 5px;
+        }
+    </style>
+
+    <!--<script src="echarts.js"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.7.2/echarts-en.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.17.0/axios.min.js"></script>
+</head>
+<body>
+<div id="chart-panel"></div>
+<script type="text/javascript">
+  var myChart  = null
+  var option = null
+
+  axios.get('/goapi/stats/new_elements_month/2002')
+       .then(function (response) {
+         console.log(response)
+         let data = response.data
+         console.log(data)
+         console.log(
+           'years array only thanks to a map: ',
+           data.map((i) => i.year));
+         let fields = Object.getOwnPropertyNames(data[0])
+         console.log('fields name: ', fields)
+         let transposed = {}
+         fields.map((field_name) => transposed[field_name] = data.map(
+           (record) => record[field_name]))
+         console.log('transposed data thanks to 2 nested map: ', transposed);
+
+
+         myChart = echarts.init(document.getElementById('chart-panel'));
+
+         // specify chart configuration item and data
+         option = {
+           title: {
+             text: ''
+           },
+           // http://colorbrewer2.org/#type=qualitative&scheme=Set1&n=7
+           color: ['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00', '#ffff33', '#a65628'],
+
+           tooltip: {
+             trigger: 'axis',
+             axisPointer: {
+               type: 'shadow'
+             }
+           },
+           dataZoom: [
+             {   // This dataZoom component controls x-axis by dafault
+               type: 'slider', // this dataZoom component is dataZoom component of slider
+               start: 85,      // the left is located at 10%
+               end: 99.5         // the right is located at 60%
+             }
+           ],
+           legend: {
+             right: '1px',
+             data: ['affaires', 'suivis', 'documents', 'objets', 'enveloppes_entrant', 'enveloppes_sortant', 'acteurs',
+               'moyenne affaires', 'moyenne suivis', 'moyenne documents', 'moyenne objets', 'moyenne enveloppes_entrant', 'moyenne enveloppes_sortant', 'moyenne acteurs',
+             ]
+           },
+           grid: {
+             left: '3%',
+             right: '4%',
+             bottom: '8%',
+             containLabel: true
+           },
+           xAxis: {
+             axisLine: {show: false},
+             axisTick: {show: true},
+             axisLabel: {
+               rotate: 90
+             },
+             splitArea: {show: true},
+             splitLine: {show: true },
+             data: transposed.year_month
+           },
+           yAxis: {},
+           series: [
+             {
+               name: 'affaires',
+               type: 'bar',
+               data: transposed.n_affaires,
+               animationDelay: function (idx) {
+                 return idx * 10;
+               }
+             }, {
+               name: 'suivis',
+               type: 'bar',
+               data: transposed.n_suivis,
+               animationDelay: function (idx) {
+                 return idx * 10 + 20;
+               }
+             }, {
+               name: 'documents',
+               type: 'bar',
+               data: transposed.n_documents,
+               animationDelay: function (idx) {
+                 return idx * 10 + 25;
+               }
+             }, {
+               name: 'objets',
+               type: 'bar',
+               data: transposed.n_things,
+               animationDelay: function (idx) {
+                 return idx * 10 + 30;
+               }
+             }, {
+               name: 'enveloppes_entrant',
+               type: 'bar',
+               data: transposed.n_enveloppes_entrant,
+               animationDelay: function (idx) {
+                 return idx * 10 + 35;
+               }
+             }, {
+               name: 'enveloppes_sortant',
+               type: 'bar',
+               data: transposed.n_enveloppes_sortant,
+               animationDelay: function (idx) {
+                 return idx * 10 + 40;
+               }
+             }, {
+               name: 'acteurs',
+               type: 'bar',
+               data: transposed.n_acteurs,
+               animationDelay: function (idx) {
+                 return idx * 10 + 45;
+               }
+             },
+             {
+               name: 'moyenne affaires',
+               type: 'line',
+               data: transposed.avg_affaires
+             }, {
+               name: 'moyenne suivis',
+               type: 'line',
+               data: transposed.avg_suivis
+             }, {
+               name: 'moyenne documents',
+               type: 'line',
+               data: transposed.avg_documents
+             }, {
+               name: 'moyenne objets',
+               type: 'line',
+               data: transposed.avg_things
+             }, {
+               name: 'moyenne enveloppes_entrant',
+               type: 'line',
+               data: transposed.avg_enveloppes_entrant
+             }, {
+               name: 'moyenne enveloppes_sortant',
+               type: 'line',
+               data: transposed.avg_enveloppes_sortant
+             }, {
+               name: 'moyenne acteurs',
+               type: 'line',
+               data: transposed.avg_acteurs
+             }
+           ],
+           animationEasing: 'elasticOut',
+           animationDelayUpdate: function (idx) {
+             return idx * 3;
+           }
+         };
+
+         // use configuration item and data specified to show chart
+         myChart.setOption(option);
+       })
+       .catch(function (error) {
+         console.log(error);
+       });
+</script>
+</body>
+</html>
